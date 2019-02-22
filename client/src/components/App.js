@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Content from './Content';
+import { Wrapper } from '../stylized/appStyle';
 
-class App extends Component {
+class App extends PureComponent {
   render() {
     return (
       <BrowserRouter>
-        <div className="App">
+        <Wrapper className="App">
           <header className="App-header">
             <h1>Folder - File App</h1>
           </header>
@@ -15,7 +16,7 @@ class App extends Component {
               <Route path="/" render={props => <Content {...props} />} />
             </Switch>
           </main>
-        </div>
+        </Wrapper>
       </BrowserRouter>
     );
   }

@@ -1,24 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { isElementDeleted } from '../services/serverReq';
+import { Li, Button, LinkElement } from '../stylized/elementStyle';
 
-const deleteElementFromServer = async (elementPath, elementType) =>
-  await axios.delete(`/getFolder`, {
-    params: {
-      elementPath,
-      elementType,
-    },
-  });
-
-const isElementDeleted = async (elementPath, elementType) => {
-  const { status: response } = await deleteElementFromServer(
-    elementPath,
-    elementType
-  );
-  return response;
-};
-
-export default class Element extends Component {
+export default class Element extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -38,31 +23,35 @@ export default class Element extends Component {
     const { deletedResponse } = this.state;
     const deletePart =
       deletedResponse === 0 ? (
-        <div>
+        <Li>
           <Link to={`${path}${name}`}>
-            {type} : {name}
+            <LinkElement type={type}>
+              {type} : {name}
+            </LinkElement>
           </Link>
-          <button
+          <Button
             onClick={this.deleteElement.bind(this, `${path}${name}`, type)}
           >
             Delete
-          </button>
-        </div>
+          </Button>
+        </Li>
       ) : deletedResponse === 200 ? (
-        <p>
-          {type} : {name} DELETED
-        </p>
+        <Li>
+          <p>
+            {type} : {name} DELETED
+          </p>
+        </Li>
       ) : (
-        <div>
-          <button
+        <Li>
+          <Button
             onClick={this.deleteElement.bind(this, `${path}${name}`, type)}
           >
             Delete
-          </button>
+          </Button>
           <p>NOT DELETED</p>
-        </div>
+        </Li>
       );
 
-    return <li>{deletePart}</li>;
+    return deletePart;
   }
 }

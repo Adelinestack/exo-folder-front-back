@@ -1,36 +1,16 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import Element from './Element';
-import axios from 'axios';
+import { getFolder, isElementCreated } from '../services/serverReq';
+import {
+  ElementList,
+  CreationPart,
+  NameInput,
+  Type,
+  Button,
+  Path,
+} from '../stylized/contentStyle';
 
-const getFolderFromServer = async folderPath =>
-  await axios.get(`/getFolder`, {
-    params: {
-      folderPath,
-    },
-  });
-
-const getFolder = async folderPath => {
-  const contentFolder = await getFolderFromServer(folderPath);
-  return contentFolder;
-};
-
-const createElementOnServer = async (elementPath, elementName, elementType) =>
-  await axios.post(`/getFolder`, {
-    elementPath,
-    elementName,
-    elementType,
-  });
-
-const isElementCreated = async (elementPath, elementName, elementType) => {
-  const { status: response } = await createElementOnServer(
-    elementPath,
-    elementName,
-    elementType
-  );
-  return response;
-};
-
-export default class Content extends Component {
+export default class Content extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -111,37 +91,43 @@ export default class Content extends Component {
     });
     return (
       <div>
-        <div>
-          <h2>Create an element in {pathname}</h2>
-          <input
+        <CreationPart>
+          <h2>
+            Create an element in <Path>{pathname}</Path>
+          </h2>
+          <NameInput
             type="text"
             onChange={this.onInputChange.bind(this)}
             value={this.state.elementToCreateName}
           />
-          <input
-            type="radio"
-            id="folder"
-            name="type"
-            value="folder"
-            checked={selectedType === 'folder'}
-            onChange={this.handleOptionChange.bind(this)}
-          />
-          <label htmlFor="folder">Folder</label>
-          <input
-            type="radio"
-            id="file"
-            name="type"
-            value="file"
-            checked={selectedType === 'file'}
-            onChange={this.handleOptionChange.bind(this)}
-          />
-          <label htmlFor="file">File</label>
-          <button onClick={this.createElement.bind(this, pathname)}>
+          <Type>
+            <input
+              type="radio"
+              id="folder"
+              name="type"
+              value="folder"
+              checked={selectedType === 'folder'}
+              onChange={this.handleOptionChange.bind(this)}
+            />
+            <label htmlFor="folder">Folder</label>
+            <input
+              type="radio"
+              id="file"
+              name="type"
+              value="file"
+              checked={selectedType === 'file'}
+              onChange={this.handleOptionChange.bind(this)}
+            />
+            <label htmlFor="file">File</label>
+          </Type>
+          <Button onClick={this.createElement.bind(this, pathname)}>
             Create
-          </button>
-        </div>
-        <p>{pathname}</p>
-        <ul>{displayElements}</ul>
+          </Button>
+        </CreationPart>
+        <p>
+          You are in : <Path>{pathname}</Path>
+        </p>
+        <ElementList>{displayElements}</ElementList>
       </div>
     );
   }

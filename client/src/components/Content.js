@@ -14,11 +14,24 @@ const getFolder = async folderPath => {
   return contentFolder;
 };
 
+const createFileOnServer = async (filePath, fileName) =>
+  await axios.post(`/getFolder`, {
+    filePath,
+    fileName,
+  });
+
+const isFileCreated = async (filePath, fileName) => {
+  const { status: response } = await createFileOnServer(filePath, fileName);
+  return response;
+};
+
 export default class Content extends Component {
   constructor(props) {
     super(props);
     this.state = {
       elementsList: [],
+      fileToCreateName: '',
+      creationResponse: 0,
     };
   }
 
@@ -39,15 +52,32 @@ export default class Content extends Component {
     });
   }
 
+  onInputChange({ target: { value: fileToCreateName } }) {
+    this.setState({
+      fileToCreateName,
+    });
+  }
+
+  async createFile(pathname) {
+    const creationResponse = await isFileCreated(
+      pathname,
+      this.state.fileToCreateName
+    );
+    this.setState({
+      creationResponse,
+    });
+  }
+
   render() {
     const { elementsList } = this.state;
+    const { pathname } = this.props.location;
     const displayElements = elementsList.map(element => {
       if (element.isDir === true) {
         return (
           <Element
-            path={this.props.location.pathname}
+            path={pathname}
             name={`${element.name}/`}
-            icon={'Folder'}
+            type={'Folder'}
             key={`${element.name}${Date.now()}`}
           />
         );
@@ -56,16 +86,21 @@ export default class Content extends Component {
       } else
         return (
           <Element
-            path={this.props.location.pathname}
+            path={pathname}
             name={element.name}
-            icon={'File'}
+            type={'File'}
             key={`${element.name}${Date.now()}`}
           />
         );
     });
     return (
       <div>
-        <p>{this.props.location.pathname}</p>
+        <div>
+          <h2>Create a file in {pathname}</h2>
+          <input type="text" onChange={this.onInputChange.bind(this)} />
+          <button onClick={this.createFile.bind(this, pathname)}>Create</button>
+        </div>
+        <p>{pathname}</p>
         <ul>{displayElements}</ul>
       </div>
     );

@@ -24,13 +24,16 @@ const deleteElement = (elementPath, elementType) => {
   }
 };
 
-const createFile = (filePath, fileName) => {
-  console.log(`../foldertest${filePath}/${fileName}`);
-  fs.appendFileSync(
-    `../foldertest${filePath}/${fileName}`,
-    'New file for test',
-    'utf8'
-  );
+const createElement = (elementPath, elementName, elementType) => {
+  if (elementType === 'file') {
+    fs.appendFileSync(
+      `../foldertest${elementPath}/${elementName}`,
+      `New file ${elementName} for test`,
+      'utf8'
+    );
+  } else {
+    fs.mkdirSync(`../foldertest${elementPath}/${elementName}`);
+  }
 };
 
 app.get('/getFolder', (req, res) => {
@@ -51,7 +54,6 @@ app.get('/getFolder', (req, res) => {
 app.delete('/getFolder', (req, res) => {
   const path = req.query.elementPath;
   const type = req.query.elementType;
-
   const isElementDeleted = deleteElement(path, type);
   if (typeof isElementDeleted === 'undefined') {
     res.sendStatus(200);
@@ -61,10 +63,8 @@ app.delete('/getFolder', (req, res) => {
 });
 
 app.post('/getFolder', (req, res) => {
-  console.log(req.body);
-  const path = req.body.filePath;
-  const fileName = req.body.fileName;
-  createFile(path, fileName);
+  const { elementPath, elementName, elementType } = req.body;
+  createElement(elementPath, elementName, elementType);
   res.sendStatus(200);
 });
 

@@ -14,14 +14,19 @@ const getFolder = async folderPath => {
   return contentFolder;
 };
 
-const createFileOnServer = async (filePath, fileName) =>
+const createElementOnServer = async (elementPath, elementName, elementType) =>
   await axios.post(`/getFolder`, {
-    filePath,
-    fileName,
+    elementPath,
+    elementName,
+    elementType,
   });
 
-const isFileCreated = async (filePath, fileName) => {
-  const { status: response } = await createFileOnServer(filePath, fileName);
+const isElementCreated = async (elementPath, elementName, elementType) => {
+  const { status: response } = await createElementOnServer(
+    elementPath,
+    elementName,
+    elementType
+  );
   return response;
 };
 
@@ -30,8 +35,9 @@ export default class Content extends Component {
     super(props);
     this.state = {
       elementsList: [],
-      fileToCreateName: '',
+      elementToCreateName: '',
       creationResponse: 0,
+      selectedType: 'folder',
     };
   }
 
@@ -52,24 +58,34 @@ export default class Content extends Component {
     });
   }
 
-  onInputChange({ target: { value: fileToCreateName } }) {
+  onInputChange = ({ target: { value: elementToCreateName } }) => {
     this.setState({
-      fileToCreateName,
+      elementToCreateName,
     });
-  }
+  };
 
-  async createFile(pathname) {
-    const creationResponse = await isFileCreated(
+  async createElement(pathname) {
+    const { elementToCreateName, selectedType } = this.state;
+    const creationResponse = await isElementCreated(
       pathname,
-      this.state.fileToCreateName
+      elementToCreateName,
+      selectedType
     );
     this.setState({
       creationResponse,
+      elementToCreateName: '',
     });
+    this.fetchFolder(pathname);
   }
 
+  handleOptionChange = ({ target: { value: selectedType } }) => {
+    this.setState({
+      selectedType,
+    });
+  };
+
   render() {
-    const { elementsList } = this.state;
+    const { elementsList, selectedType } = this.state;
     const { pathname } = this.props.location;
     const displayElements = elementsList.map(element => {
       if (element.isDir === true) {
@@ -96,9 +112,33 @@ export default class Content extends Component {
     return (
       <div>
         <div>
-          <h2>Create a file in {pathname}</h2>
-          <input type="text" onChange={this.onInputChange.bind(this)} />
-          <button onClick={this.createFile.bind(this, pathname)}>Create</button>
+          <h2>Create an element in {pathname}</h2>
+          <input
+            type="text"
+            onChange={this.onInputChange.bind(this)}
+            value={this.state.elementToCreateName}
+          />
+          <input
+            type="radio"
+            id="folder"
+            name="type"
+            value="folder"
+            checked={selectedType === 'folder'}
+            onChange={this.handleOptionChange.bind(this)}
+          />
+          <label htmlFor="folder">Folder</label>
+          <input
+            type="radio"
+            id="file"
+            name="type"
+            value="file"
+            checked={selectedType === 'file'}
+            onChange={this.handleOptionChange.bind(this)}
+          />
+          <label htmlFor="file">File</label>
+          <button onClick={this.createElement.bind(this, pathname)}>
+            Create
+          </button>
         </div>
         <p>{pathname}</p>
         <ul>{displayElements}</ul>
